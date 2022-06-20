@@ -1,0 +1,140 @@
+using System;
+using System.IO;
+using Newtonsoft.Json;
+
+
+namespace _2._2
+{
+    class Time
+    {
+        public short hours;
+        public short minutes;
+        public short seconds;
+        public bool SetHours(short h1)
+        {
+            if (h1 < 0 || h1 > 23)
+            {
+                Console.WriteLine("Невiрно введенi години. \n");
+                return false;
+            }
+            else
+            {
+                hours = h1;
+                return true;
+            }
+        }
+        public bool SetMinutes(short m1)
+        {
+            if (m1 < 0 || m1 > 59)
+            {
+                Console.WriteLine("Невiрно введенi хвилини. \n");
+                return false;
+            }
+            else
+            {
+                minutes = m1;
+                return true;
+            }
+        }
+        public bool SetSeconds(short s1)
+        {
+            if (s1 < 0 || s1 > 59)
+            {
+                Console.WriteLine("Невiрно введенi секунди. \n");
+                return false;
+            }
+            else
+            {
+                seconds = s1;
+                return true;
+            }
+        }
+        public TimeSpan GetTime()
+        {
+            TimeSpan CurrentTime = new TimeSpan(hours, minutes, seconds);
+            return CurrentTime;
+        }
+        public void AddTime(short h, short m, short s)
+        {
+            seconds = (short)(seconds + s);
+            while (seconds > 59)
+            {
+                seconds = (short)(seconds - 60);
+                minutes = (short)(minutes + 1);
+            }
+
+            minutes = (short)(minutes + m);
+            while (minutes > 59)
+            {
+                minutes = (short)(minutes - 60);
+                hours = (short)(hours + 1);
+            }
+
+            hours = (short)(hours + h);
+            while (hours > 23)
+            {
+                hours = (short)(hours - 24);
+            }
+        }
+        public void Save(object A)
+        {
+            File.WriteAllText(@"C:\Casual\1.json", JsonConvert.SerializeObject(A));
+
+            using (StreamWriter file = File.CreateText(@"C:\Casual\1.json"))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Serialize(file, A);
+            }
+            Console.WriteLine("Збережено \n");
+        }
+        public void Extract(object A)
+        {
+            Time CTime = JsonConvert.DeserializeObject<Time>(File.ReadAllText(@"C:\Casual\1.json"));
+
+            CTime.AddTime(1, 1, 1);
+            Console.WriteLine(CTime.GetTime());
+        }
+    }
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Time theTime = new Time();
+            short a;
+
+            Console.WriteLine("Введiть години:");
+            a = short.Parse(Console.ReadLine());
+            if (!theTime.SetHours(a)) { return; }
+
+            Console.WriteLine("Введiть хвилини:");
+            a = short.Parse(Console.ReadLine());
+            if (!theTime.SetMinutes(a)) { return; }
+
+            Console.WriteLine("Введiть секунди:");
+            a = short.Parse(Console.ReadLine());
+            if (!theTime.SetSeconds(a)) { return; }
+
+            //Вивiд
+            Console.WriteLine(theTime.GetTime() + "\n");
+
+            //Змiна часу
+            Console.WriteLine("Введiть на скiльки годин змiнити час:");
+            short h1 = short.Parse(Console.ReadLine());
+
+            Console.WriteLine("Введiть на скiльки хвилин змiнити час:");
+            short m1 = short.Parse(Console.ReadLine());
+
+            Console.WriteLine("Введiть на скiльки секунд змiнити час:");
+            short s1 = short.Parse(Console.ReadLine());
+            
+            theTime.AddTime(h1, m1, s1);
+            Console.WriteLine(theTime.GetTime() + "\n");
+
+            //Збереження в Json файл
+            theTime.Save(theTime);
+
+            //Вiдкриття Json файлу та створення об'єкта класу Time
+            theTime.Extract(theTime);
+        }
+    }
+}
